@@ -50,18 +50,12 @@ def toISO(v_date):
 
 def cdb_format_to_view_format(string):
     return {
-        u"dgfFinancialAssets": u"Право вимоги",
-        u"dgfOtherAssets": u"Майно банку",
         u"0": u"Невідомо",
         u"1": u'Вперше',
         u"2": u'Вдруге',
         u"3": u'Втретє',
         u"4": u'Вчетверте',
         u"CPV": u"ДК021",
-        u"bidder1": u"Один",
-        u"bidder2": u"Два",
-        u"sub_False": u"Продажу",
-        u"sub_True":  u"Оренди"
     }.get(string, string)
 
 def getRegistrationDetailsStatus(string):
@@ -97,9 +91,6 @@ def view_to_cdb_fromat(string):
             u"кг.": u"кілограми",
             u"кг": u"кілограми",
             u"MTK":u"метри квадратні",
-            u"Право вимоги": u"dgfFinancialAssets",
-            u"Майно банку": u"dgfOtherAssets",
-            u"Голландський аукціон": u"dgfInsider",
             u"грн.": u"UAH",
             u"грн": u"UAH",
             u" з ПДВ": True,

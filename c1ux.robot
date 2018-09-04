@@ -67,161 +67,6 @@ Login
   Click Element                       id=login-form-button
   Wait Until Page Contains Element    css=.logout   45
 
-Створити тендер
-  [Arguments]   ${user_name}   ${auction_data}
-  ${procurementMethodType}=        Get From Dictionary   ${auction_data.data}   procurementMethodType
-  ${tenderAttempts}=               Get From Dictionary   ${auction_data.data}   tenderAttempts
-  ${title}=                        Get From Dictionary   ${auction_data.data}   title
-  ${description}=                  Get From Dictionary   ${auction_data.data}   description
-  ${dgfID}=                        Get From Dictionary   ${auction_data.data}   dgfID
-  ${valueAmount}=                  Get From Dictionary   ${auction_data.data.value}   amount
-  ${valueAddedTaxIncluded}=        Get From Dictionary   ${auction_data.data.value}   valueAddedTaxIncluded
-  ${minimalStepAmount}=            Get From Dictionary   ${auction_data.data.minimalStep}   amount
-  ${guaranteeAmount}=              Get From Dictionary   ${auction_data.data.guarantee}   amount
-  ${auctionPeriodStartDate}=       Get From Dictionary   ${auction_data.data.auctionPeriod}   startDate
-
-  ${nameContactPoint}=             Get From Dictionary    ${auction_data.data.procuringEntity.contactPoint}   name
-  ${emailContactPoint}=            Get From Dictionary    ${auction_data.data.procuringEntity.contactPoint}   email
-  ${faxNumberContactPoint}=        Get From Dictionary    ${auction_data.data.procuringEntity.contactPoint}   faxNumber
-  ${telephoneContactPoint}=        Get From Dictionary    ${auction_data.data.procuringEntity.contactPoint}   telephone
-  ${urlContactPoint}=              Get From Dictionary    ${auction_data.data.procuringEntity.contactPoint}   url
-
-
-  #Prepare
-  ${procurementMethodType}=        cdb_format_to_view_format   ${procurementMethodType}
-  ${tenderAttempts}=               Convert To String    ${tenderAttempts}
-  ${tenderAttempts}=               cdb_format_to_view_format   ${tenderAttempts}
-  ${valueAmount} =                 Convert To String   ${valueAmount}
-  ${valueAddedTaxIncluded}         Convert To String   ${valueAddedTaxIncluded}
-  ${valueAddedTaxIncluded}         Convert To Lowercase   ${valueAddedTaxIncluded}
-  ${minimalStepAmount}=            Convert To String   ${minimalStepAmount}
-  ${guaranteeAmount}=              Convert To String   ${guaranteeAmount}
-  ${auctionPeriodStartDate}=       auction_period_to_broker_format   ${auctionPeriodStartDate}
-
-
-  ${items}=                                Get From Dictionary   ${auction_data.data}   items
-  ${number_of_items}=                      Get Length   ${items}
-  ${isContainMinNumberOfQualifiedBids}=    Run Keyword And Return Status   Dictionary Should Contain Key  ${auction_data.data}  minNumberOfQualifiedBids
-  ${minNumberOfQualifiedBids}=                 Run Keyword If          ${isContainMinNumberOfQualifiedBids}
-  ...   Get From Dictionary                    ${auction_data.data}    minNumberOfQualifiedBids
-  ...   ELSE                                   Set Variable            2
-
-  ##====================== Продаж / Оренда ========================
-  ${is_lease}=          Set Variable    ${FALSE}
-  :FOR  ${index}        IN RANGE        ${number_of_items}
-  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA01-7
-  \  Exit For Loop If   ${is_lease}
-  \  ${is_lease}=       Run Keyword And Return Status    Should Be Equal   ${items[${index}].additionalClassifications[0].id}   PA02-0
-  \  Exit For Loop If   ${is_lease}
-  ##====================== Продаж / Оренда ========================
-
-
-  Wait Until Element Is Visible    id=add_auction
-  Click Link                       id=add_auction
-  Wait Until Page Contains         Створення аукціону
-  ${subProcurementtype}=           cdb_format_to_view_format   sub_${is_lease}
-  Run Keyword If   ${is_lease}     SelectBox   auction-subprocurementtype    ${subProcurementtype}
-  Sleep    1
-  ${minNumberOfQualifiedBids}=     cdb_format_to_view_format   bidder${minNumberOfQualifiedBids}
-  Run Keyword If   ${is_lease}     SelectBox   auction-minnumberbids    ${minNumberOfQualifiedBids}
-
-  SelectBox                        auction-tenderattempts   ${tenderAttempts}
-  Input Text                       id=auction-title    ${title}
-  Input Text                       id=auction-description    ${description}
-  Input Text                       id=auction-dgfid    ${dgfID}
-  Input Text                       id=Auction-value-amount   ${valueAmount}
-  SwitchBox                        Auction-value-valueAddedTaxIncluded   ${valueAddedTaxIncluded}
-  Input Text                       id=Auction-minimalStep-amount   ${minimalStepAmount}
-  Input Text                       id=Auction-guarantee-amount   ${guaranteeAmount}
-  Execute JavaScript               $('#auction-auctionperiod-startdate-disp').removeAttr('readonly');
-  Input Text                       id=auction-auctionperiod-startdate-disp   ${auctionPeriodStartDate}
-  Input Text                       id=contactPerson-name   ${nameContactPoint}
-  Input Text                       id=contactPerson-telephone   ${telephoneContactPoint}
-  Input Text                       id=contactPerson-faxNumber   ${faxNumberContactPoint}
-  Input Text                       id=contactPerson-email   ${emailContactPoint}
-  Input Text                       id=contactPerson-url   ${urlContactPoint}
-  Scroll To Element                .box-footer
-  Click Element                    xpath=//button[contains(text(), 'Далі')]
-
-   #Items part
-  Додати активи                    ${items}
-  Click Link                       id=endEdit
-  Wait Until Page Contains         Чернетки
-  Дія з аукціоном-чернеткою        draft-publication
-  Wait Until Keyword Succeeds   4 x   20 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Очікування публікації
-  Click Link                        css=.auction-draft-status
-  Wait Until Element Is Visible     css=.auction-auctionID
-  ${auctionID}=                     Get Text   css=.auction-auctionID
-  [return]                          ${auctionID}
-
-Очікування публікації
-  ${publicationStatus}=   Get Text   css=.auction-draft-status
-  Should Be Equal   '${publicationStatus}'   'Опубліковано'
-
-Класифікатор
-  [Arguments]   ${classificationId}    ${scheme}
-  Click Link                          css=.classifications
-  Wait Until Element Is Visible       id=classificationsearch-code
-  ${scheme}=                          cdb_format_to_view_format   ${scheme}
-  Select From List By Value           id=classificationsearch-scheme    ${scheme}
-  Sleep    1
-  Input Text                          id=classificationsearch-code   ${classificationId}
-  Click Element                       id=classification-search-find
-  Wait Until Page Contains Element    xpath=//tr[contains(@data-classification, '${classificationId}')]
-  Sleep    1
-  Click Element                       xpath=//tr[contains(@data-classification, '${classificationId}')]
-  Wait Until Element Is Visible       id=save-and-hide-modal-btn
-  Click Element                       id=save-and-hide-modal-btn
-  Sleep    2
-
-Додати актив
-  [Arguments]   ${item}
-  ${description}=                 Get From Dictionary   ${item}   description
-  ${quantity}=                    Get From Dictionary   ${item}   quantity
-  ${unitName}=                    Get From Dictionary   ${item.unit}   name
-  ${classificationId}=            Get From Dictionary   ${item.classification}   id
-  ${classificationScheme}=        Get From Dictionary   ${item.classification}   scheme
-
-  ${quantity}=                    Convert To String   ${quantity}
-
-  Період дії договору оренди      ${item}
-
-  Input Text                      id=item-description   ${description}
-  Input Text                      id=item-quantity   ${quantity}
-  SelectBox                       item-unitid   ${unitName}
-  Класифікатор                    ${classificationId}   ${classificationScheme}
-  Scroll To Element               .box-footer
-  Click Element                   xpath=//button[contains(text(), 'Зберегти')]
-  Wait Until Element Is Visible   id=endEdit   30
-
-Заповнити період оренди
-  [Arguments]   ${locator}   ${value}
-  Execute JavaScript   $('#${locator}').removeAttr('readonly');
-  ${value}=            contract_period   ${value}
-  Input Text           id=${locator}   ${value}
-  Sleep                1
-
-Період дії договору оренди
-  [Arguments]   ${item}
-  ${isExistStartDate}=   Run Keyword And Return Status   Dictionary Should Contain Key  ${item.contractPeriod}  startDate
-  ${isExistEndDate}=     Run Keyword And Return Status   Dictionary Should Contain Key  ${item.contractPeriod}  endDate
-  Run Keyword If    ${isExistStartDate}   Заповнити період оренди   item-contractperiod-startdate-disp    ${item.contractPeriod.startDate}
-  Run Keyword If    ${isExistEndDate}     Заповнити період оренди   item-contractperiod-enddate-disp      ${item.contractPeriod.endDate}
-
-На форму додавання активу
-  ${addItem}=   Run Keyword And Return Status   Page Should Contain Element   xpath=//a[contains(text(), 'Додати актив')]
-  Run Keyword If   ${addItem}   Click Element   xpath=//a[contains(text(), 'Додати актив')]
-  Wait Until Element Is Visible   id=item-description   15
-
-Додати активи
-  [Arguments]   ${items}
-  ${count}=   Get Length   ${items}
-  : FOR    ${index}    IN RANGE   ${count}
-  \   На форму додавання активу
-  \   Додати актив   ${items[${index}]}
-
 Шукати і знайти
   [Arguments]   ${auction_id}
   Input Text                           id=main-auctionsearch-title   ${auction_id}
@@ -233,9 +78,7 @@ Login
   [Arguments]   ${user_name}   ${auction_id}
   Run Keyword And Return If   "UA-AR-P" in "${auction_id}"     c1ux.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${auction_id}
   Run Keyword And Return If   "UA-LR-SSP" in "${auction_id}"   c1ux.Пошук лоту по ідентифікатору         ${user_name}   ${auction_id}
-
   Перейти до аукціонів
-
   Wait Until Page Contains Element    id=main-auctionsearch-title   45
   ${timeout_on_wait}=                 Get Broker Property By Username  ${user_name}  timeout_on_wait
   ${passed}=                          Run Keyword And Return Status   Wait Until Keyword Succeeds   6 x  ${timeout_on_wait} s  Шукати і знайти   ${auction_id}
@@ -268,22 +111,6 @@ Login
   Run Keyword And Ignore Error   На початок сторінки
   Run Keyword And Ignore Error   Click Link   css=.auction-reload
 
-Завантажити документ в тендер з типом
-  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${document_type}=${EMPTY}
-  c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ продаю
-  Дія з аукціоном                    auction-documents
-  Wait Until Page Contains Element   id=documents-box-auctionDocuments   30
-  Розгорнути блоки
-  Sleep                              2
-  Click Element                      xpath=//div[@id='documents-box-auctionDocuments']//button[contains(@class, 'add-item')]
-  Sleep                              2
-  ${addedBlock}=                     Execute JavaScript   return $('#documents-list-w0-auctionDocuments').find('.form-documents-item').last().attr('id');
-  Choose File                        xpath=//div[@id='${addedBlock}']//input[@class='document-img']   ${file_path}
-  Wait Until Page Contains           Done    30
-  Run Keyword If                     '${document_type}' != '${EMPTY}'   Select From List By Value   xpath=//div[@id='${addedBlock}']//select  ${document_type}
-  Click Element                      xpath=//button[contains(text(), 'Заватажити')]
-
 Отримати кількість предметів в тендері
   [Arguments]  ${username}  ${tender_uaid}
   c1ux.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
@@ -294,7 +121,6 @@ Login
   [Arguments]  ${user_name}   ${file_path}   ${auction_id}
   c1ux.Завантажити документ в тендер з типом   ${user_name}   ${auction_id}   ${file_path}
 
-
 Змінити документ в ставці
   [Arguments]   ${username}   ${tender_uaid}    ${path}   ${docid}
   Fail    Після відправки заявки оператору майданчика  - змінити доки неможливо
@@ -303,16 +129,6 @@ Login
    [Arguments]   ${valueAmount}
    ${valueAmountToString}=   Convert To String   ${valueAmount}
    Input text                id=Bid-value-amount   ${valueAmountToString}
-
-Чи фінасова процедура
-  ${procurementMethodType}=       Get Text    css=.auction-procurementMethodType
-  ${isOther}=                     Run Keyword And Return Status   Should Be Equal   '${procurementMethodType}'     'Майно банку'
-  Return From Keyword If          ${isOther}   ${FALSE}
-  ${isFinancial}=                 Run Keyword And Return Status   Should Be Equal   '${procurementMethodType}'     'Право вимоги'
-  Return From Keyword If          ${isFinancial}    ${isFinancial}
-  ${subProcurementMethodType}=    Get Text    css=.auction-dutchProcurementMethodType
-  ${dutchIsFinancial}=            Run Keyword And Return Status   Should Be Equal   '${subProcurementMethodType}'  'Права вимоги'
-  [return]                        ${dutchIsFinancial}
 
 Прикріпити фейковий док до пропозиції
   ${file_path}  ${file_name}  ${file_content}=  create_fake_doc
@@ -339,19 +155,6 @@ Login
   Wait Until Element Is Visible   css=.${class}
   Click Link                      css=.${class}
 
-Завантажити фінансову ліцензію
-  [Arguments]   ${user_name}   ${auction_id}   ${file_path}
-  c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ купую
-  Дія з пропозицією                  bid-edit
-  Wait Until Page Contains Element   css=.document-img
-  Scroll To Element                  .tab-content
-  Choose File                        css=.document-img   ${file_path}
-  Wait Until Page Contains           Done
-  Click Element                      xpath=//button[contains(text(), 'Зберегти')]
-  Wait Until Element Is Visible      xpath=//p[contains(text(), 'Купую')]   30
-  Дія з пропозицією                  bid-publication
-
 Завантажити документ в ставку
   [Arguments]  ${user_name}  ${file_path}  ${auction_id}
   c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
@@ -369,24 +172,6 @@ Login
   Sleep    1
   Click Link                      xpath=//a[@href="/privatization/bid/buy"]
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
-
-Перейти в розділ продаю
-  Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[contains(text(), 'Продаю')]
-  Click Link                      xpath=//a[contains(text(), 'Продаю')]
-  Wait Until Element Is Visible   xpath=//p[contains(text(), 'Продаю')]
-
-Дія з аукціоном-чернеткою
-  [Arguments]   ${class}
-  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
-  Wait Until Element Is Visible   css=.${class}
-  Click Link                      css=.${class}
-
-Дія з аукціоном
-  [Arguments]   ${class}
-  Execute JavaScript              $('.one_card').first().find('.fa-angle-down').click();
-  Wait Until Element Is Visible   css=.${class}
-  Click Link                      css=.${class}
 
 Скасувати цінову пропозицію
   [Arguments]   ${user_name}   ${auction_id}
@@ -483,19 +268,6 @@ Login
   ${status}=   view_to_cdb_fromat   ${status}
   [return]     ${status}
 
-Отримати інформацію про dgfDecisionID
-  ${dgfDecisionID}=   Отримати текст із поля і показати на сторінці   dgfDecisionID
-  [return]            ${dgfDecisionID}
-
-Отримати інформацію про dgfDecisionDate
-  ${dgfDecisionDate}=   Отримати текст із поля і показати на сторінці   dgfDecisionDate
-  ${dgfDecisionDate}=   convert_date_to_dash_format   ${dgfDecisionDate}
-  [return]              ${dgfDecisionDate}
-
-Отримати інформацію про eligibilityCriteria
-  ${return_value}=   Отримати текст із поля і показати на сторінці   eligibilityCriteria
-  [return]           ${return_value}
-
 Отримати інформацію про procurementMethodType
   Run Keyword And Return   Get Element Attribute   xpath=//span[@class='auction-procurementMethodType']@data-procurementMethodType
 
@@ -504,10 +276,6 @@ Login
   ${return_value}=   Evaluate   "".join("${return_value}".replace(",",".").split(' '))
   ${return_value}=   Convert To Number   ${return_value}
   [return]           ${return_value}
-
-Отримати інформацію про dgfID
-  ${dgfID}=   Отримати текст із поля і показати на сторінці   dgfID
-  [return]    ${dgfID}
 
 Отримати інформацію про title
   ${title}=   Отримати текст із поля і показати на сторінці   title
@@ -571,12 +339,6 @@ Login
   ${tenderAttempts}=   view_to_cdb_fromat   ${tenderAttempts}
   [return]             ${tenderAttempts}
 
-Отримати інформацію про minNumberOfQualifiedBids
-  Таб Параметри аукціону
-  ${minNumberOfQualifiedBids}=   Отримати текст із поля і показати на сторінці   minNumberOfQualifiedBids
-  ${minNumberOfQualifiedBids}=   Convert To Integer    ${minNumberOfQualifiedBids}
-  [return]                       ${minNumberOfQualifiedBids}
-
 Отримати інформацію про auctionPeriod.startDate
   Таб Параметри аукціону
   ${startDate}=   Отримати текст із поля і показати на сторінці    auctionPeriod.startDate
@@ -617,12 +379,6 @@ Login
   ${return_value}=   subtract_from_time   ${return_value}  0  0
   [return]           ${return_value}
 
-Отримати інформацію про enquiryPeriod.startDate
-  Fail  enquiryPeriod відсутній
-
-Отримати інформацію про enquiryPeriod.endDate
-  Fail  enquiryPeriod відсутній
-
 Отримати інформацію із предмету
   [Arguments]   ${user_name}   ${auction_id}   ${item_id}   ${field}
   Таб Активи аукціону
@@ -652,52 +408,9 @@ Login
 Скролл до табів
   Scroll To Element    .nav-tabs-ubiz
 
-Завантажити протокол аукціону
-  [Arguments]   ${user_name}   ${auction_id}   ${file_path}   ${award_index}
-  c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ купую
-  Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Дія з пропозицією    bid-award-protocol
-  Wait Until Page Contains         Завантаження протоколу аукціону
-  Завантажити один документ        ${file_path}
-  Click Element                    xpath=//button[contains(text(), 'Завантажити')]
-
 Завантажити ілюстрацію
   [Arguments]   ${user_name}   ${auction_id}   ${file_path}
   c1ux.Завантажити документ в тендер з типом   ${user_name}   ${auction_id}   ${file_path}   illustration
-
-Додати публічний паспорт активу
-  [Arguments]   ${user_name}   ${auction_id}  ${certificate_url}
-  c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ продаю
-  Дія з аукціоном                       auction-documents
-  Wait Until Page Contains Element      id=documents-box-auctionDocuments   30
-  Розгорнути блоки
-  Sleep                                 2
-  Click Element                         xpath=//div[@id='documents-box-auctionDocuments']//button[contains(@class, 'add-item')]
-  Sleep                                 2
-  ${addedBlock}=                        Execute JavaScript   return $('#documents-list-w0-auctionDocuments').find('.form-documents-item').last().attr('id');
-  Select From List By Value             xpath=//div[@id='${addedBlock}']//select   x_dgfPublicAssetCertificate
-  Wait Until Page Contains Element      xpath=//div[@id='${addedBlock}']//textarea[contains(@name, 'textDocument')]    10
-  Input text                            xpath=//div[@id='${addedBlock}']//textarea[contains(@name, 'textDocument')]   ${certificate_url}
-  Click Element                         xpath=//button[contains(text(), 'Заватажити')]
-
-Додати офлайн документ
-  [Arguments]  ${user_name}  ${auction_id}  ${accessDetails}
-  c1ux.Пошук тендера по ідентифікатору   ${user_name}   ${auction_id}
-  Перейти в розділ продаю
-  Дія з аукціоном                       auction-documents
-  Wait Until Page Contains Element      id=documents-box-auctionDocuments   30
-  Розгорнути блоки
-  Sleep                                 2
-  Click Element                         xpath=//div[@id='documents-box-auctionDocuments']//button[contains(@class, 'add-item')]
-  Sleep                                 2
-  ${addedBlock}=                        Execute JavaScript   return $('#documents-list-w0-auctionDocuments').find('.form-documents-item').last().attr('id');
-  Select From List By Value             xpath=//div[@id='${addedBlock}']//select    x_dgfAssetFamiliarization
-  Wait Until Page Contains Element      xpath=//div[@id='${addedBlock}']//textarea[contains(@name, 'textDocument')]    10
-  Input text                            xpath=//div[@id='${addedBlock}']//textarea[contains(@name, 'textDocument')]   ${accessDetails}
-  Click Element                         xpath=//button[contains(text(), 'Заватажити')]
 
 Отримати інформацію із запитання
   [Arguments]   ${user_name}   ${auction_id}   ${question_id}   ${field}
@@ -713,15 +426,6 @@ Login
   ...   AND   Page Should Contain Element   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
   ${fieldValue}=    Get Text   xpath=//div[contains(@data-question-title, '${question_id}')]//*[contains(@class, 'question-${field}')]
   [return]          ${fieldValue}
-
-Отримати інформацію із документа по індексу
-  [Arguments]   ${user_name}   ${auction_id}   ${document_index}   ${field}
-  c1ux.Пошук тендера у разі наявності змін   ${TENDER['LAST_MODIFICATION_DATE']}   ${user_name}   ${auction_id}
-  Таб Документи
-  Wait Until Element Is Visible         id=auction-docs
-  ${text}=                              Get Text   css=.document-documentType
-  ${text}=                              view_to_cdb_fromat   ${text}
-  [return]                              ${text}
 
 Отримати інформацію із документа
   [Arguments]   ${user_name}   ${auction_id}   ${document_id}   ${field}
@@ -799,24 +503,6 @@ Login
   Таб Документи
   ${countDocuments}=     Get Matching Xpath Count   xpath=//p[contains(@class,'document-datePublished')]
   [return]               ${countDocuments}
-
-Отримати кількість документів в ставці
-  [Arguments]  ${username}  ${tender_uaid}  ${bid_index}
-  c1ux.Пошук тендера по ідентифікатору   ${username}   ${tender_uaid}
-  Зайти в розділ кваліфікація
-  ${drop_id}=  Catenate   SEPARATOR=   ${C1UX_LOT_ID}   _pending
-  ${action_id}=   Catenate   SEPARATOR=   ${C1UX_LOT_ID}   _confirm_protocol
-  Wait Until Keyword Succeeds   10 x   20 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Клацнути по випадаючому списку  ${drop_id}
-  ...   AND   Element Should Be Visible   id=${action_id}
-  Виконати дію   ${action_id}
-  Wait Until Page Contains   Учасник по лоту   10
-  Wait Until Keyword Succeeds   10 x   15 s   Run Keywords
-  ...   Reload Page
-  ...   AND   Wait Until Page Contains   Підписаний протокол
-  ${bid_doc_number}=   Get Matching Xpath Count   xpath=//a[contains(@class, 'document_title')]
-  [return]  ${bid_doc_number}
 
 Отримати дані із документу пропозиції
   [Arguments]  ${username}   ${tender_uaid}   ${bid_index}   ${document_index}   ${field}
@@ -1019,16 +705,6 @@ Scroll To Element
   [Arguments]   ${locator}   ${value}
   ${value}=     Convert To String   ${value}
   Input Text    id=Edit-${locator}   ${value}
-
-Внести зміни в тендер
-  [Arguments]  ${user_name}  ${auction_id}  ${field}  ${value}
-  c1ux.Пошук тендера по ідентифікатору    ${user_name}  ${auction_id}
-  Перейти в розділ продаю
-  Дія з аукціоном                    auction-edit
-  Wait Until Page Contains Element   id=Edit-value-amount   15
-  Змінити ціновий показник    ${field.replace('.', '-')}    ${value}
-  Click Element               xpath=//button[contains(text(), 'Оновити')]
-  Wait Until Page Contains    Продаю
 
 Перейти в малу приватизацію
   Wait Until Element Is Visible   xpath=//ul[contains(@class, 'bookmarks')]
