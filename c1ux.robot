@@ -96,8 +96,8 @@ Login
 Відкрити всі аукціони
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/auction']
-  Click Link                      xpath=//a[@href='/privatization/auction']
+  Wait Until Element Is Visible   xpath=//a[@id='category-select']/following::a[@href='/privatization/auction']
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href='/privatization/auction']
 
 На початок сторінки
   Execute JavaScript     $(window).scrollTop(0);
@@ -170,7 +170,7 @@ Login
   На початок сторінки
   Click Element                   id=category-select
   Sleep    1
-  Click Link                      xpath=//a[@href="/privatization/bid/buy"]
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href="/privatization/bid/buy"]
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Купую')]   30
 
 Скасувати цінову пропозицію
@@ -823,8 +823,8 @@ Scroll To Element
 Перейти в мої об`єкти
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset/sell']
-  Click Link                      xpath=//a[@href='/privatization/asset/sell']
+  Wait Until Element Is Visible   xpath=//a[@id='category-select']/following::a[@href='/privatization/asset/sell']
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href='/privatization/asset/sell']
   Wait Until Element Is Visible   xpath=//p[contains(text(), 'Мої')]    10
 
 Пошук об’єкта МП по ідентифікатору
@@ -849,8 +849,8 @@ Scroll To Element
 Оновити сторінку з об'єктом МП
   [Arguments]   ${user_name}   ${asset_id}
   c1ux.Пошук об’єкта МП по ідентифікатору   ${user_name}   ${asset_id}
-  Click Element                          css=.asset-reload
-  Wait Until Page Contains Element       xpath=//span[contains(@class, 'asset-assetID')]   45
+  Run Keyword And Ignore Error      Click Element   css=.asset-reload
+  Wait Until Page Contains Element  xpath=//span[contains(@class, 'asset-assetID')]   45
 
 Отримати інформацію із об'єкта МП
   [Arguments]   ${user_name}   ${asset_id}   ${field}
@@ -1023,8 +1023,8 @@ Scroll To Element
 Перейти на головну сторінку об’єктів
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/asset']
-  Click Link                      xpath=//a[@href='/privatization/asset']
+  Wait Until Element Is Visible   xpath=//a[@id='category-select']/following::a[@href='/privatization/asset']
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href='/privatization/asset']
   Sleep                           2
 
 Завантажити документ для видалення об'єкта МП
@@ -1091,16 +1091,15 @@ Scroll To Element
 Перейти в мої лоти
   Click Element                   id=category-select
   Sleep                           1
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot/sell']
-  Click Link                      xpath=//a[@href='/privatization/lot/sell']
+  Wait Until Element Is Visible   xpath=//a[@id='category-select']/following::a[@href='/privatization/lot/sell']
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href='/privatization/lot/sell']
   Wait Until Element Is Visible   css=.lot_image
 
 Оновити сторінку з лотом
   [Arguments]   ${user_name}   ${lot_id}
   c1ux.Пошук лоту по ідентифікатору   ${user_name}   ${lot_id}
-  Click Element                          css=.lot-reload
-  Wait Until Page Contains Element       xpath=//span[contains(@class, 'auction-auctionID')]   45
-
+  Run Keyword And Ignore Error       Click Element   css=.lot-reload
+  Wait Until Page Contains Element   xpath=//span[contains(@class, 'auction-auctionID')]   45
 
 Відкрити таб аукціонів в редагуванні лоту
   Wait Until Element Is Visible   xpath=//a[contains(@href, '#auctions')]
@@ -1235,8 +1234,8 @@ Scroll To Element
 Відкрити всі лоти
   На початок сторінки
   Click Element                   id=category-select
-  Wait Until Element Is Visible   xpath=//a[@href='/privatization/lot']
-  Click Link                      xpath=//a[@href='/privatization/lot']
+  Wait Until Element Is Visible   xpath=//a[@id='category-select']/following::a[@href='/privatization/lot']
+  Click Link                      xpath=//a[@id='category-select']/following::a[@href='/privatization/lot']
 
 Відкрити лот на редагування
   На початок сторінки
