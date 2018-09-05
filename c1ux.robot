@@ -89,8 +89,8 @@ Login
 
 Перейти до аукціонів
   Перейти в малу приватизацію
-  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/auction']@class
-  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/auction']
+  ${activeModule}=      Get Element Attribute   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/auction']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/auction']
   Відкрити всі аукціони
 
 Відкрити всі аукціони
@@ -1059,8 +1059,8 @@ Scroll To Element
 
 Перейти до лотів
   Перейти в малу приватизацію
-  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/lot']@class
-  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/lot']
+  ${activeModule}=      Get Element Attribute   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/lot']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/lot']
 
 Створити лот
   [Arguments]   ${user_name}   ${adapted_data}   ${asset_uaid}
@@ -1559,8 +1559,8 @@ Scroll To Element
 
 Перейти до контрактів
   Перейти в малу приватизацію
-  ${activeModule}=      Get Element Attribute   xpath=//a[@href='/privatization/contracting']@class
-  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//a[@href='/privatization/contracting']
+  ${activeModule}=      Get Element Attribute   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/contracting']@class
+  Run Keyword Unless   '${activeModule}' == 'active'   Click Element   xpath=//ul[contains(@class, 'links')]//a[@href='/privatization/contracting']
 
 Пошук контракту по ідентифікатору
   [Arguments]   ${user_name}   ${contract_id}
