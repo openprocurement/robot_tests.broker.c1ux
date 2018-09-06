@@ -889,6 +889,11 @@ Scroll To Element
 Відкрити таб рішень
   Click Element   xpath=//a[@href='#decisions']
   Sleep           1
+  Розгорнути всі рішення
+
+Розгорнути всі рішення
+  Execute Javascript   $("#decisions .tab-pane").addClass("active")
+  Sleep                1
 
 Отримати інформацію про assetHolder.name
   Click Element                   xpath=//a[@data-target='#assetHolder-info-modal']
@@ -1250,7 +1255,7 @@ Scroll To Element
 Отримати інформацію про lotID
   Run Keyword And Return  Get Text  css=.auction-auctionID
 
-Отримати інформацію про assets
+Отримати інформацію про relatedProcesses[0].relatedProcessID
   Run Keyword And Return  Get Text  css=.assetID
 
 Отримати інформацію про decisions[1].title
