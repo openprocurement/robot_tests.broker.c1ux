@@ -1695,3 +1695,9 @@ Scroll To Element
   Scroll To Element                  .action_period
   Click Element                      id=to-unsuccessful
   Wait Until Page Contains Element   xpath=//a[@href='#milestones']
+
+Отримати інформацію про minNumberOfQualifiedBids
+  Таб Параметри аукціону
+  ${minNumberOfQualifiedBids}=   Отримати текст із поля і показати на сторінці   minNumberOfQualifiedBids
+  ${minNumberOfQualifiedBids}=   Convert To Integer    ${minNumberOfQualifiedBids}
+  [return]                       ${minNumberOfQualifiedBids}
